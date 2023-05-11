@@ -1,55 +1,56 @@
 ﻿using System.Text;
 
-namespace FileLogger
+namespace FileLogging
 {
     public class FileLogger : IFileLogger
-{
-    private readonly List<string> _logs = new List<string>();
-    private readonly FileInfo _fileInfoToSave;
-    private Object _locker = new Object();
-    public const int BatchSaveThreshold10000 = 10000;
-    private bool AnyLogsToSave { get { return _logs.Count >= BatchSaveThreshold10000; } }
+    {
+        private readonly List<string> _logs = new List<string>();
+        private readonly FileInfo _fileInfoToSave;
+        private readonly Object _locker = new Object();
+        public const int BatchSaveThreshold = 10000;
+        private bool AnyLogsToSave { get { return _logs.Count >= BatchSaveThreshold; } }
 
-    public FileLogger(FileInfo fileInfoToSave)
-    {
-        _fileInfoToSave = fileInfoToSave;
-    }
-    // Synchronous call for creating a list
-    public async Task Log(List<string> logs)
-    {
-        _logs.AddRange(logs);
-        await SaveLogToFileAsBatch();
-    }
-    // Asynchronous call to save fast
-    private async Task SaveLogToFileAsBatch()
-    {
-
-        while (AnyLogsToSave)
+        public FileLogger(FileInfo fileInfoToSave)
         {
-            // Try to get the file handle
-            StringBuilder logsConcatenatedWithLineFeed = new StringBuilder().AppendJoin(System.Environment.NewLine, _logs.Take(BatchSaveThreshold10000));
-            while (true)
+            _fileInfoToSave = fileInfoToSave;
+        }
+        // Synchronous call for creating a list
+        public async Task Log(List<string> logs)
+        {
+            _logs.AddRange(logs);
+            await SaveLogToFileAsBatch();
+        }
+        // Asynchronous call to save fast
+        private async Task SaveLogToFileAsBatch()
+        {
+
+            while (AnyLogsToSave)
             {
-                // Save a batch of 
-                try
+                // Try to get the file handle
+                StringBuilder logsConcatenatedWithLineFeed = new StringBuilder().AppendJoin(System.Environment.NewLine, _logs.Take(BatchSaveThreshold));
+                while (true)
                 {
-                    lock (_locker)
+                    // Save a batch of 
+                    try
                     {
-                        using (FileStream file = new FileStream(_fileInfoToSave.FullName, FileMode.Append, FileAccess.Write))
-                        using (StreamWriter writer = new StreamWriter(file, Encoding.Unicode))
+                        lock (_locker)
                         {
-                            writer.Write(logsConcatenatedWithLineFeed);
-                            _logs.RemoveRange(0, BatchSaveThreshold10000);
+                            using (FileStream file = new FileStream(_fileInfoToSave.FullName, FileMode.Append, FileAccess.Write))
+                            using (StreamWriter writer = new StreamWriter(file, Encoding.Unicode))
+                            {
+                                writer.Write(logsConcatenatedWithLineFeed);
+                                _logs.RemoveRange(0, BatchSaveThreshold);
+                            }
                         }
                     }
-                }
-                catch
-                {
+                    catch
+                    {
 
+                    }
+                    await Task.Delay(5);
                 }
-                await Task.Delay(5);
+
             }
-
         }
     }
 }

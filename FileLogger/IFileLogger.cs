@@ -1,4 +1,4 @@
-﻿namespace FileLogger
+﻿namespace FileLogging
 {
     public interface IFileLogger
     {
