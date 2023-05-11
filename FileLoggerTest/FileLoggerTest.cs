@@ -6,10 +6,10 @@ namespace FileLoggerTest
 {
     public class FileLoggerTest
     {
-        FileInfo _fileInfoTest;
+        private readonly FileInfo _fileInfoTest;
 
         public const string Testfile1 = @"\Testfile.txt";
-        private List<string> logList = new List<string>();
+        private readonly List<string> logList = new List<string>();
         public FileLoggerTest()
         {
             _fileInfoTest = new FileInfo(new StringBuilder(System.Environment.CurrentDirectory).Append(Testfile1).ToString());
@@ -26,13 +26,5 @@ namespace FileLoggerTest
             await fileLogger.Log(logList);
             Assert.True(_fileInfoTest.Exists);
         }
-        [Fact]
-        public void CanSave2()
-        {
-            IFileLogger fileLogger = new FileLogger(_fileInfoTest);
-            fileLogger.Log(logList);
-            Assert.True(_fileInfoTest.Exists);
-        }
-
     }
 }
