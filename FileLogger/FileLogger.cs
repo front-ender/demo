@@ -23,7 +23,6 @@ namespace FileLogging
         // Asynchronous call to save fast
         private async Task SaveLogToFileAsBatch()
         {
-
             while (AnyLogsToSave)
             {
                 // Try to get the file handle
