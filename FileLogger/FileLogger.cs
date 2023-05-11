@@ -28,28 +28,24 @@ namespace FileLogging
             {
                 // Try to get the file handle
                 StringBuilder logsConcatenatedWithLineFeed = new StringBuilder().AppendJoin(System.Environment.NewLine, _logs.Take(BatchSaveThreshold));
-                while (true)
+                // Save a batch of 
+                try
                 {
-                    // Save a batch of 
-                    try
+                    lock (_locker)
                     {
-                        lock (_locker)
+                        using (FileStream file = new FileStream(_fileInfoToSave.FullName, FileMode.Append, FileAccess.Write))
+                        using (StreamWriter writer = new StreamWriter(file, Encoding.Unicode))
                         {
-                            using (FileStream file = new FileStream(_fileInfoToSave.FullName, FileMode.Append, FileAccess.Write))
-                            using (StreamWriter writer = new StreamWriter(file, Encoding.Unicode))
-                            {
-                                writer.Write(logsConcatenatedWithLineFeed);
-                                _logs.RemoveRange(0, BatchSaveThreshold);
-                            }
+                            writer.Write(logsConcatenatedWithLineFeed);
+                            _logs.RemoveRange(0, BatchSaveThreshold);
                         }
                     }
-                    catch
-                    {
-
-                    }
-                    await Task.Delay(5);
                 }
+                catch
+                {
 
+                }
+                await Task.Delay(5);
             }
         }
     }
