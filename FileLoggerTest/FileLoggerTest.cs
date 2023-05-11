@@ -13,10 +13,7 @@ namespace FileLoggerTest
         public FileLoggerTest()
         {
             _fileInfoTest = new FileInfo(new StringBuilder(System.Environment.CurrentDirectory).Append(Testfile1).ToString());
-            for (int i = 0; i < FileLogger.BatchSaveThreshold; i++)
-            {
-                logList.Add(string.Format("Some log entry {0}", i));
-            }
+            Enumerable.Range(1, FileLogger.BatchSaveThreshold).ToList().ForEach(x => logList.Add(string.Format("Some log entry {0}", x)));
         }
 
         [Fact]
